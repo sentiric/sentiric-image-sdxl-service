@@ -134,7 +134,11 @@ services:
 
     environment:
       - ENV=development
-      - SDXL_MODEL_ID=stabilityai/sd-turbo
+      - SD_MODEL_ID=stabilityai/sd-turbo
+      # - SD_MODEL_ID=segmind/SSD-1B
+      # - SD_MODEL_ID=RunDiffusion/Juggernaut-XL-v9
+      # - SD_MODEL_ID=RunDiffusion/Juggernaut-XL
+
       - LOG_LEVEL=info
       - LOG_FORMAT=json
       - TENANT_ID=sentiric_demo
