@@ -41,7 +41,7 @@ services:
       # Observer için JSON şarttır
       - LOG_FORMAT=${LOG_FORMAT:-json}
       # Container çalıştığı fiziksel makina ismi
-      - NODE_HOSTNAME=${NODE_HOSTNAME}
+      - NODE_HOSTNAME=${NODE_HOSTNAME:-rabbitmq}
 
       - RABBITMQ_DEFAULT_USER=sentiric
       - RABBITMQ_DEFAULT_PASS=sentiric_pass
@@ -82,7 +82,7 @@ services:
       # Observer için JSON şarttır
       - LOG_FORMAT=${LOG_FORMAT:-json}
       # Container çalıştığı fiziksel makina ismi
-      - NODE_HOSTNAME=${NODE_HOSTNAME}
+      - NODE_HOSTNAME=${NODE_HOSTNAME:-minio}
 
       - MINIO_FS_STAT_CACHE_LIMIT=0
       - MINIO_ROOT_USER=sentiric
