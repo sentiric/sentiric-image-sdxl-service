@@ -3,10 +3,11 @@ FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
+# Tek RUN komutunda her şeyi kur ve temizle (Katman şişmesini önler)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.10 python3-dev python3-pip python3-venv \
-    libsndfile1 curl git ffmpeg build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    curl git ffmpeg build-essential \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
@@ -17,16 +18,16 @@ ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv venv $VIRTUAL_ENV --python /usr/bin/python3.10
 
+# Sadece requirements'ı kopyala (Cache'i verimli kullanmak için)
 COPY requirements.txt .
 
-# Sentiric ML Stack Alignment
-RUN uv pip install --no-cache \
-    torch==2.5.1 \
-    torchvision \
-    --index-url https://download.pytorch.org/whl/cu124
+# PyTorch ve gereksinimleri kur, ardından UV cache'ini tamamen sil!
+RUN uv pip install --no-cache torch==2.5.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
+    uv pip install --no-cache -r requirements.txt && \
+    uv cache clean
 
-RUN uv pip install --no-cache -r requirements.txt
-
+# Şimdi GÜVENLİ bir şekilde kaynak kodumuzu kopyalayabiliriz
+# (dockerignore sayesinde model-cache gelmeyecek)
 COPY . .
 
 RUN mkdir -p /app/model-cache && \
@@ -39,7 +40,6 @@ USER appuser
 ENV HF_HOME="/app/model-cache"
 ENV HF_HUB_DISABLE_PROGRESS_BARS=1
 
-# SDXL Ports
 EXPOSE 16210 16211
 
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 16210 --no-access-log"]
